@@ -1,0 +1,211 @@
+     1                                  ;Author Richard Gresham
+     2                                  ;CPSC 240-7 Test 1
+     3                                  
+     4                                  ;===== Begin code area ========================================================================================================
+     5                                  
+     6                                  
+     7                                  extern printf
+     8                                  extern scanf
+     9                                  
+    10                                  global distanceio
+    11                                  
+    12                                  
+    13                                  segment .data
+    14                                  
+    15 00000000 506C6561736520656E-     input1message db "Please enter the coordinates of the first point seperated by ws: " ,10, 0
+    15 00000009 746572207468652063-
+    15 00000012 6F6F7264696E617465-
+    15 0000001B 73206F662074686520-
+    15 00000024 666972737420706F69-
+    15 0000002D 6E7420736570657261-
+    15 00000036 746564206279207773-
+    15 0000003F 3A200A00           
+    16 00000043 506C6561736520656E-     input2message db "Please enter the coordinates of the second point seperated by ws: ",10, 0
+    16 0000004C 746572207468652063-
+    16 00000055 6F6F7264696E617465-
+    16 0000005E 73206F662074686520-
+    16 00000067 7365636F6E6420706F-
+    16 00000070 696E74207365706572-
+    16 00000079 617465642062792077-
+    16 00000082 733A200A00         
+    17                                  
+    18 00000087 546865206469737461-     mathmessage db "The distance between those two points is %lf math units " ,10 ,0
+    18 00000090 6E6365206265747765-
+    18 00000099 656E2074686F736520-
+    18 000000A2 74776F20706F696E74-
+    18 000000AB 7320697320256C6620-
+    18 000000B4 6D61746820756E6974-
+    18 000000BD 73200A00           
+    19 000000C1 546865206469737461-     endingmessage db "The distance module will now return that number to the caller module." ,10 , 0
+    19 000000CA 6E6365206D6F64756C-
+    19 000000D3 652077696C6C206E6F-
+    19 000000DC 772072657475726E20-
+    19 000000E5 74686174206E756D62-
+    19 000000EE 657220746F20746865-
+    19 000000F7 2063616C6C6572206D-
+    19 00000100 6F64756C652E0A00   
+    20 00000108 256C6600                valuestring1 db "%lf" , 0
+    21 0000010C 256C6600                valuestring2 db "%lf" , 0 
+    22                                  
+    23 00000110 256C6600                valuestring3 db "%lf" , 0
+    24                                  
+    25 00000114 256C6600                valuestring4 db "%lf" , 0
+    26                                  
+    27 00000118 257300                  stringformat db "%s", 0
+    28                                  
+    29                                  segment .bss
+    30                                  
+    31                                  
+    32                                  
+    33                                  segment .text
+    34                                  
+    35                                  distanceio:
+    36                                  
+    37                                  ;Prolog ===== Insurance for any caller of this assembly module ========================================================
+    38                                  ;Any future program calling this module that the data in the caller's GPRs will not be modified. ;useful to always do
+    39 00000000 55                      push rbp
+    40 00000001 4889E5                  mov  rbp,rsp
+    41 00000004 57                      push rdi                                                    ;Backup rdi
+    42 00000005 56                      push rsi                                                    ;Backup rsi
+    43 00000006 52                      push rdx                                                    ;Backup rdx
+    44 00000007 51                      push rcx                                                    ;Backup rcx
+    45 00000008 4150                    push r8                                                     ;Backup r8
+    46 0000000A 4151                    push r9                                                     ;Backup r9
+    47 0000000C 4152                    push r10                                                    ;Backup r10
+    48 0000000E 4153                    push r11                                                    ;Backup r11
+    49 00000010 4154                    push r12                                                    ;Backup r12
+    50 00000012 4155                    push r13                                                    ;Backup r13
+    51 00000014 4156                    push r14                                                    ;Backup r14
+    52 00000016 4157                    push r15                                                    ;Backup r15
+    53 00000018 53                      push rbx                                                    ;Backup rbx
+    54 00000019 9C                      pushf                                                       ;Backup rflags
+    55                                  
+    56                                  ;Registers rax, rip, and rsp are usually not backed up.
+    57 0000001A 6A00                    push qword 0
+    58                                  
+    59                                  
+    60                                  
+    61                                  ;display outputmessage
+    62                                  
+    63 0000001C B800000000              mov rax, 0
+    64 00000021 48BF-                   mov rdi, input1message
+    64 00000023 [0000000000000000] 
+    65 0000002B E8(00000000)            call printf
+    66                                  
+    67                                  
+    68                                  ;Begin scan f block 
+    69                                  
+    70 00000030 6A00                    push qword 0
+    71 00000032 B800000000              mov rax, 0
+    72 00000037 48BF-                   mov rdi, valuestring1
+    72 00000039 [0801000000000000] 
+    73 00000041 4889E6                  mov rsi, rsp
+    74 00000044 E8(00000000)            call scanf
+    75 00000049 F2440F103C24            movsd xmm15, [rsp]
+    76                                  
+    77 0000004F 58                      pop rax
+    78                                  
+    79                                  ;scan f block 2
+    80 00000050 6A00                    push qword 0
+    81 00000052 B800000000              mov rax, 0
+    82 00000057 48BF-                   mov rdi, valuestring2
+    82 00000059 [0C01000000000000] 
+    83 00000061 4889E6                  mov rsi, rsp
+    84 00000064 E8(00000000)            call scanf
+    85 00000069 F2440F103424            movsd xmm14, [rsp]
+    86                                  
+    87 0000006F 58                      pop rax
+    88                                  
+    89 00000070 B800000000              mov rax, 0
+    90 00000075 48BF-                   mov rdi, input2message
+    90 00000077 [4300000000000000] 
+    91 0000007F E8(00000000)            call printf
+    92                                  
+    93                                  ;scanf block
+    94 00000084 6A00                    push qword 0
+    95 00000086 B800000000              mov rax, 0
+    96 0000008B 48BF-                   mov rdi, valuestring3
+    96 0000008D [1001000000000000] 
+    97 00000095 4889E6                  mov rsi, rsp
+    98 00000098 E8(00000000)            call scanf
+    99 0000009D F2440F102C24            movsd xmm13, [rsp]
+   100                                  
+   101 000000A3 58                      pop rax
+   102                                  
+   103                                  
+   104                                  
+   105                                  ;scanf 2nd part
+   106 000000A4 6A00                    push qword 0
+   107 000000A6 B800000000              mov rax, 0
+   108 000000AB 48BF-                   mov rdi, valuestring4
+   108 000000AD [1401000000000000] 
+   109 000000B5 4889E6                  mov rsi, rsp
+   110 000000B8 E8(00000000)            call scanf
+   111 000000BD F2440F102424            movsd xmm12, [rsp]
+   112                                  
+   113                                  
+   114                                  
+   115                                  ;======================Arithmatic part===================================
+   116                                  
+   117                                  ;distance between A and B is √(𝑎1−𝑏1)^2+(𝑎2−𝑏2)^2
+   118                                  
+   119 000000C3 F2450F5CFD              subsd xmm15, xmm13  ;a1 - b1
+   120                                  
+   121 000000C8 F2450F59FF              mulsd xmm15, xmm15 ; (a1-b1)^2
+   122                                  
+   123 000000CD F2450F5CF4              subsd xmm14, xmm12 ;a2-b2
+   124                                  
+   125 000000D2 F2450F59F6              mulsd xmm14, xmm14 ; (a2-b2)^2
+   126                                  
+   127 000000D7 F2450F58FE              addsd xmm15, xmm14 ; (a1-b1)^2 + (a2 - b2) ^2
+   128                                  
+   129 000000DC F2450F51DF              sqrtsd xmm11, xmm15  ; √(𝑎1−𝑏1)^2+(𝑎2−𝑏2)^2
+   130                                  
+   131                                  ;============================final messages================================
+   132                                  
+   133                                  
+   134                                  ;output the distance
+   135                                  
+   136                                  
+   137 000000E1 B801000000              mov rax, 1
+   138 000000E6 48BF-                   mov rdi, mathmessage
+   138 000000E8 [8700000000000000] 
+   139 000000F0 F2410F10C3              movsd xmm0, xmm11
+   140 000000F5 E8(00000000)            call printf
+   141                                  
+   142                                  
+   143                                  
+   144 000000FA B800000000              mov rax, 0
+   145 000000FF 48BF-                   mov rdi, endingmessage
+   145 00000101 [C100000000000000] 
+   146 00000109 E8(00000000)            call printf
+   147                                  
+   148                                  
+   149                                  
+   150 0000010E 58                      pop rax
+   151 0000010F 58                      pop rax
+   152                                  
+   153 00000110 F2410F10C3              movsd xmm0, xmm11 
+   154                                  
+   155                                  
+   156                                  ;===== Restore original values to integer registers ===================================================================
+   157 00000115 9D                      popf                                                        ;Restore rflags
+   158 00000116 5B                      pop rbx                                                     ;Restore rbx
+   159 00000117 415F                    pop r15                                                     ;Restore r15
+   160 00000119 415E                    pop r14                                                     ;Restore r14
+   161 0000011B 415D                    pop r13                                                     ;Restore r13
+   162 0000011D 415C                    pop r12                                                     ;Restore r12
+   163 0000011F 415B                    pop r11                                                     ;Restore r11
+   164 00000121 415A                    pop r10                                                     ;Restore r10
+   165 00000123 4159                    pop r9                                                      ;Restore r9
+   166 00000125 4158                    pop r8                                                      ;Restore r8
+   167 00000127 59                      pop rcx                                                     ;Restore rcx
+   168 00000128 5A                      pop rdx                                                     ;Restore rdx
+   169 00000129 5E                      pop rsi                                                     ;Restore rsi
+   170 0000012A 5F                      pop rdi                                                     ;Restore rdi
+   171 0000012B 5D                      pop rbp                                                     ;Restore rbp
+   172                                  
+   173                                  
+   174 0000012C C3                      ret
+   175                                  
+   176                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**

@@ -1,0 +1,188 @@
+     1                                  ;****************************************************************************************************************************
+     2                                  ;Create a program in mixed languages (C, C++, and of course x86) that will ask for user input of float values
+     3                                  ; it will make sure user doesn't overfill array and will display floats in array and return sum to main.                                                                                                                      *
+     4                                  ;This file is part of the software program "Sum of an array".                                                        *
+     5                                  ;Sum of an Array is free software: you can redistribute it and/or modify it under the terms of the GNU General Public*
+     6                                  ;License version 3 as published by the Free Software Foundation.                                                            *
+     7                                  ;Sum of an Array is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the       *
+     8                                  ;implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more      *
+     9                                  ;details.  A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                  *
+    10                                  ;****************************************************************************************************************************
+    11                                  
+    12                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    13                                  ;
+    14                                  ;Author information
+    15                                  ;  Author name: Richard Gresham
+    16                                  ;  Author email: rgresham@csu.fullerton.edu
+    17                                  ;
+    18                                  ;Program information
+    19                                  ;  Program name: Sum of a array
+    20                                  ;  Programming languages: One modules in C++ and one module in X86
+    21                                  ;  Date program began: 2021-Mar-06
+    22                                  ;  Date of last update: 2021-Mar-21
+    23                                  ;  Date comments upgraded: 2021-Mar-21
+    24                                  ;  Date open source license added: 2021-Mar-06
+    25                                  ;  Files in this program: Control.asm, Display.cpp, Fill.asm, Main.c, Script.sh, Sum.asm
+    26                                  ;  Status: Finished.
+    27                                  ;  References consulted: CS 240 class notes/lectures/Professor examples ie. floatio. Seyfarth, Chapter 18
+    28                                  ;  Future upgrade possible: software to reject non-floats.
+    29                                  ;
+    30                                  ;Purpose
+    31                                  ;  Create a program in mixed languages (C, C++, and of course x86) that will ask for user input to fill an array.
+    32                                  ;  The program will prevent array overfill and will display the array and return the sum of array to main.
+    33                                  ;  
+    34                                  ;
+    35                                  ;This file
+    36                                  ;  File name: Fill.asm
+    37                                  ;  Language: X86 with Intel syntax.
+    38                                  ;  Max page width: 132 columns
+    39                                  ;  Assemble: nasm -f elf64 -l Fill.asm
+    40                                  
+    41                                  ;=====================================================================================================================================
+    42                                  extern printf
+    43                                  extern scanf
+    44                                  
+    45                                  global Fill
+    46                                  
+    47                                  segment .data
+    48 00000000 506C6561736520656E-     prompt1 db "Please enter floating point numbers seperated by ws.", 10, 0
+    48 00000009 74657220666C6F6174-
+    48 00000012 696E6720706F696E74-
+    48 0000001B 206E756D6265727320-
+    48 00000024 736570657261746564-
+    48 0000002D 2062792077732E0A00 
+    49 00000036 5768656E2066696E69-     prompt2 db "When finished press enter followed by cntl+D" , 10, 0
+    49 0000003F 736865642070726573-
+    49 00000048 7320656E7465722066-
+    49 00000051 6F6C6C6F7765642062-
+    49 0000005A 7920636E746C2B440A-
+    49 00000063 00                 
+    50 00000064 54686520636F756E74-     display1 db "The counter is at %ld" , 10 ,0
+    50 0000006D 657220697320617420-
+    50 00000076 256C640A00         
+    51 0000007B 256C6600                float_format db "%lf",0
+    52                                  
+    53                                  
+    54                                  segment .bss
+    55                                  
+    56                                  
+    57                                  segment .text
+    58                                  
+    59                                  
+    60                                  Fill:
+    61                                  
+    62                                  
+    63                                  
+    64                                  ;===== Backup all the registers that are used in this program =====================================================================
+    65 00000000 55                      push rbp                                                    ;Backup the base pointer
+    66 00000001 4889E5                  mov  rbp,rsp                                                ;Advance the base pointer to start of the current stack frame
+    67 00000004 57                      push rdi                                                    ;Backup rdi
+    68 00000005 56                      push rsi                                                    ;Backup rsi
+    69 00000006 52                      push rdx                                                    ;Backup rdx
+    70 00000007 51                      push rcx                                                    ;Backup rcx
+    71 00000008 4150                    push r8                                                     ;Backup r8
+    72 0000000A 4151                    push r9                                                     ;Backup r9
+    73 0000000C 4152                    push r10                                                    ;Backup r10
+    74 0000000E 4153                    push r11                                                    ;Backup r11: printf often changes r11
+    75 00000010 4154                    push r12                                                    ;Backup r12
+    76 00000012 4155                    push r13                                                    ;Backup r13
+    77 00000014 4156                    push r14                                                    ;Backup r14
+    78 00000016 4157                    push r15                                                    ;Backup r15
+    79 00000018 53                      push rbx                                                    ;Backup rbx
+    80 00000019 9C                      pushf                                                       ;Backup rflags
+    81                                  ;rax, rip, and rsp are intentionally not backed up.  r15 is not used explicitly in this program, but it is backed up nevertheless.
+    82                                  
+    83 0000001A 4989F6                  mov r14, rsi ;array size
+    84 0000001D 4989FF                  mov r15, rdi ;the array
+    85                                  
+    86                                  
+    87                                  
+    88 00000020 B800000000              mov rax, 0
+    89 00000025 48BF-                   mov rdi, prompt1
+    89 00000027 [0000000000000000] 
+    90 0000002F E8(00000000)            call printf
+    91                                  
+    92 00000034 B800000000              mov rax, 0
+    93 00000039 48BF-                   mov rdi, prompt2
+    93 0000003B [3600000000000000] 
+    94 00000043 E8(00000000)            call printf
+    95                                  
+    96                                  
+    97                                  
+    98                                  ;================Creating the array of Floats===========
+    99                                  
+   100                                  
+   101                                  ;this is our initial loop counter keeping track of how much of the array we fill.
+   102 00000048 41BD00000000            mov r13, 0 ;loop counter
+   103                                  
+   104                                  ;our start of our loop
+   105                                  begin_loop:
+   106                                  
+   107                                  ;compare how much we filled in our array with our array size to make sure user doesn't overfill it.
+   108 0000004E 4D39F5                  cmp r13, r14
+   109 00000051 7D30                    jge finish_loop
+   110                                  
+   111                                  ;this block indicates user input for the number.
+   112 00000053 6A00                    push qword 0
+   113 00000055 B800000000              mov rax, 0
+   114 0000005A 48BF-                   mov rdi, float_format
+   114 0000005C [7B00000000000000] 
+   115 00000064 4889E6                  mov rsi, rsp
+   116 00000067 E8(00000000)            call scanf
+   117                                  
+   118                                  
+   119                                  ;this checks to see if we inputed ctrl d, if if we did it will put -1 into rax
+   120 0000006C 4898                    cdqe
+   121                                  ;if it is equal then user indicated he is done filling array and thus it will exit.
+   122 0000006E 4883F8FF                cmp rax, -1
+   123 00000072 740D                    je done_loop
+   124                                  
+   125                                  ;if not equal continue downward and fill in number into our array.
+   126 00000074 58                      pop rax
+   127 00000075 4989C4                  mov r12 , rax
+   128                                  
+   129                                  
+   130 00000078 4F8924EF                mov [r15 + 8*r13], r12
+   131                                  
+   132 0000007C 49FFC5                  inc r13 ;increasing our loop counter for size filled.
+   133                                  
+   134 0000007F EBCD                    jmp begin_loop ;goes back to beginning of loop.
+   135                                  
+   136                                  
+   137                                  done_loop:
+   138 00000081 415A                    pop r10 ;this pops to prevent seg fault error.
+   139                                  
+   140                                  finish_loop:
+   141                                  
+   142                                  
+   143                                  
+   144                                  
+   145                                  
+   146 00000083 4C89E8                  mov rax, r13 ;stores how much we filled of the array and sends it back to control.asm
+   147                                  
+   148                                  
+   149                                  ;===== Restore original values to integer registers ===================================================================
+   150 00000086 9D                      popf                                                        ;Restore rflags
+   151 00000087 5B                      pop rbx                                                     ;Restore rbx
+   152 00000088 415F                    pop r15                                                     ;Restore r15
+   153 0000008A 415E                    pop r14                                                     ;Restore r14
+   154 0000008C 415D                    pop r13                                                     ;Restore r13
+   155 0000008E 415C                    pop r12                                                     ;Restore r12
+   156 00000090 415B                    pop r11                                                     ;Restore r11
+   157 00000092 415A                    pop r10                                                     ;Restore r10
+   158 00000094 4159                    pop r9                                                      ;Restore r9
+   159 00000096 4158                    pop r8                                                      ;Restore r8
+   160 00000098 59                      pop rcx                                                     ;Restore rcx
+   161 00000099 5A                      pop rdx                                                     ;Restore rdx
+   162 0000009A 5E                      pop rsi                                                     ;Restore rsi
+   163 0000009B 5F                      pop rdi                                                     ;Restore rdi
+   164 0000009C 5D                      pop rbp                                                     ;Restore rbp
+   165                                  
+   166                                  
+   167                                  
+   168                                  
+   169                                  
+   170 0000009D C3                      ret
+   171                                  
+   172                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+   173                                  

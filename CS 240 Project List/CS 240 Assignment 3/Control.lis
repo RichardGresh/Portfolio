@@ -1,0 +1,207 @@
+     1                                  ;****************************************************************************************************************************
+     2                                  ;Create a program in mixed languages (C, C++, and of course x86) that will ask for user input of floats into a an array of definitive size
+     3                                  ;preventing overfill if user enters in too many values. It will then display and compute the sum of the array and return it to main.*
+     4                                  ;Sum of an Array is free software: you can redistribute it and/or modify it under the terms of the GNU General Public       *
+     5                                  ;License version 3 as published by the Free Software Foundation.                                                            *
+     6                                  ;Sum of an Array is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the              *
+     7                                  ;implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more      *
+     8                                  ;details.  A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                  *
+     9                                  ;****************************************************************************************************************************
+    10                                  
+    11                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    12                                  ;
+    13                                  ;Author information
+    14                                  ;  Author name: Richard Gresham
+    15                                  ;  Author email: rgresham@csu.fullerton.edu
+    16                                  ;
+    17                                  ;Program information
+    18                                  ;  Program name: Sum of a array
+    19                                  ;  Programming languages: One modules in C++ and one module in X86
+    20                                  ;  Date program began: 2021-Mar-06
+    21                                  ;  Date of last update: 2021-Mar-24
+    22                                  ;  Date comments upgraded: 2021-Mar-24
+    23                                  ;  Date open source license added: 2021-Mar-06
+    24                                  ;  Files in this program: Control.asm, Display.cpp, Fill.asm, Main.c, Script.sh, Sum.asm
+    25                                  ;  Status: Finished.
+    26                                  ;  References consulted: CS 240 class notes/lectures/Professor examples ie. floatio. Seyfarth, Chapter 18
+    27                                  ;  Future upgrade possible: software to reject non-floats.
+    28                                  ;
+    29                                  ;Purpose
+    30                                  ;  Create a program in mixed languages (C, C++, and of course x86) that will ask for user input to fill an array.
+    31                                  ;  The program will prevent array overfill and will display the array and return the sum of array to main.
+    32                                  ;  
+    33                                  ;
+    34                                  ;This file
+    35                                  ;  File name: Control.asm
+    36                                  ;  Language: X86 with Intel syntax.
+    37                                  ;  Max page width: 132 columns
+    38                                  ;  Assemble: nasm -f elf64 -l Control.asm
+    39                                  
+    40                                  
+    41                                  ;===== Begin code area ========================================================================================================
+    42                                  
+    43                                  extern printf
+    44                                  extern scanf
+    45                                  extern Fill
+    46                                  extern Sum
+    47                                  extern Display
+    48                                  
+    49                                  global Controlio
+    50                                  
+    51                                  
+    52                                  Segment .data
+    53                                  
+    54 00000000 57656C636F6D652074-     prompt1 db "Welcome to HSAS. The accuracy and rleiability of this program is guaranteed by Richard Gresham", 10, 0
+    54 00000009 6F20485341532E2054-
+    54 00000012 686520616363757261-
+    54 0000001B 637920616E6420726C-
+    54 00000024 65696162696C697479-
+    54 0000002D 206F66207468697320-
+    54 00000036 70726F6772616D2069-
+    54 0000003F 732067756172616E74-
+    54 00000048 656564206279205269-
+    54 00000051 636861726420477265-
+    54 0000005A 7368616D0A00       
+    55                                  
+    56 00000060 546865206E756D6265-     prompt2 db "The numbers you entered are these:" , 10 , 0
+    56 00000069 727320796F7520656E-
+    56 00000072 746572656420617265-
+    56 0000007B 2074686573653A0A00 
+    57 00000084 5468652073756D206F-     prompt3 db "The sum of these value is: %.8lf" , 10 ,0
+    57 0000008D 662074686573652076-
+    57 00000096 616C75652069733A20-
+    57 0000009F 252E386C660A00     
+    58 000000A6 54686520636F6E7472-     goodbye1 db "The control module will now return the sum to the caller module." ,10 ,0
+    58 000000AF 6F6C206D6F64756C65-
+    58 000000B8 2077696C6C206E6F77-
+    58 000000C1 2072657475726E2074-
+    58 000000CA 68652073756D20746F-
+    58 000000D3 207468652063616C6C-
+    58 000000DC 6572206D6F64756C65-
+    58 000000E5 2E0A00             
+    59                                  
+    60                                  
+    61                                  Segment .bss
+    62                                  
+    63 00000000 <res 00000050>          myArray resq 10 ;set an array at size 10
+    64                                  
+    65                                  
+    66                                  
+    67                                  Segment .text
+    68                                  
+    69                                  
+    70                                  
+    71                                  Controlio:
+    72                                  
+    73                                  ;Prolog ===== Insurance for any caller of this assembly module ========================================================
+    74                                  ;Any future program calling this module that the data in the caller's GPRs will not be modified. ;useful to always do
+    75 00000000 55                      push rbp
+    76 00000001 4889E5                  mov  rbp,rsp
+    77 00000004 57                      push rdi                                                    ;Backup rdi
+    78 00000005 56                      push rsi                                                    ;Backup rsi
+    79 00000006 52                      push rdx                                                    ;Backup rdx
+    80 00000007 51                      push rcx                                                    ;Backup rcx
+    81 00000008 4150                    push r8                                                     ;Backup r8
+    82 0000000A 4151                    push r9                                                     ;Backup r9
+    83 0000000C 4152                    push r10                                                    ;Backup r10
+    84 0000000E 4153                    push r11                                                    ;Backup r11
+    85 00000010 4154                    push r12                                                    ;Backup r12
+    86 00000012 4155                    push r13                                                    ;Backup r13
+    87 00000014 4156                    push r14                                                    ;Backup r14
+    88 00000016 4157                    push r15                                                    ;Backup r15
+    89 00000018 53                      push rbx                                                    ;Backup rbx
+    90 00000019 9C                      pushf                                                       ;Backup rflags
+    91                                  
+    92                                  ;Registers rax, rip, and rsp are usually not backed up.
+    93                                  
+    94                                  
+    95                                  ;Welcome prompt asking for inputed values
+    96 0000001A 6A00                    push qword 0
+    97                                  
+    98 0000001C B800000000              mov rax, 0 
+    99 00000021 48BF-                   mov rdi, prompt1
+    99 00000023 [0000000000000000] 
+   100 0000002B E8(00000000)            call printf
+   101                                  
+   102                                  
+   103                                  ;calls fill with two parameters, rdi containing the array pointer, and rsi holding the size of the array. 
+   104 00000030 41BC00000000            mov r12, 0
+   105 00000036 B800000000              mov rax, 0
+   106 0000003B 48BF-                   mov rdi, myArray
+   106 0000003D [0000000000000000] 
+   107 00000045 BE0A000000              mov rsi, 10 ; since counter starts at 0
+   108 0000004A E8(00000000)            call Fill
+   109                                  
+   110 0000004F 4989C7                  mov r15, rax ;set r15 to how many numbers were filled in our array
+   111                                  
+   112                                  ;gives second prompt saying these numbers are:
+   113 00000052 B800000000              mov rax, 0
+   114 00000057 48BF-                   mov rdi, prompt2
+   114 00000059 [6000000000000000] 
+   115 00000061 E8(00000000)            call printf
+   116                                  
+   117                                  ;sets up the call for the C++ function Display. With parameter 1 being myarray and parameter 2 being the size of the array we filled.
+   118 00000066 6A00                    push qword 0
+   119 00000068 B800000000              mov rax, 0
+   120 0000006D 48BF-                   mov rdi, myArray
+   120 0000006F [0000000000000000] 
+   121 00000077 4C89FE                  mov rsi, r15
+   122 0000007A E8(00000000)            call Display
+   123 0000007F 58                      pop rax
+   124                                  
+   125                                  ;sets up the call for the final call which is the sum, which takes parameter 1 which is our array, and parameter 2 which is how much of that array we filled
+   126                                  
+   127 00000080 6A00                    push qword 0
+   128 00000082 B800000000              mov rax, 0
+   129 00000087 48BF-                   mov rdi, myArray
+   129 00000089 [0000000000000000] 
+   130 00000091 4C89FE                  mov rsi, r15
+   131 00000094 E8(00000000)            call Sum ;sum function will give us the sum of our entire array
+   132 00000099 58                      pop rax ;pop to prevent segfault, our number is stored in xmm0
+   133                                  
+   134 0000009A F2440F10D0              movsd xmm10, xmm0  ;set xmm10 as the register to hold our number since xmm0 is unstable
+   135                                  
+   136                                  ;give the third prompt stating what our sum is
+   137 0000009F 6A00                    push qword 0
+   138 000000A1 B801000000              mov rax, 1
+   139 000000A6 48BF-                   mov rdi, prompt3
+   139 000000A8 [8400000000000000] 
+   140 000000B0 E8(00000000)            call printf
+   141 000000B5 58                      pop rax
+   142                                  
+   143                                  ;gives our goodbye prompt stating the sum will return to Main.c
+   144 000000B6 B800000000              mov rax, 0
+   145 000000BB 48BF-                   mov rdi, goodbye1
+   145 000000BD [A600000000000000] 
+   146 000000C5 E8(00000000)            call printf
+   147                                  
+   148                                  ;moves back our sum back in xmm0 since that is the register that will return our value to main.
+   149 000000CA F2410F10C2              movsd xmm0, xmm10
+   150                                  
+   151 000000CF 58                      pop rax
+   152                                  
+   153                                  ;===== Restore original values to integer registers ===================================================================
+   154 000000D0 9D                      popf                                                        ;Restore rflags
+   155 000000D1 5B                      pop rbx                                                     ;Restore rbx
+   156 000000D2 415F                    pop r15                                                     ;Restore r15
+   157 000000D4 415E                    pop r14                                                     ;Restore r14
+   158 000000D6 415D                    pop r13                                                     ;Restore r13
+   159 000000D8 415C                    pop r12                                                     ;Restore r12
+   160 000000DA 415B                    pop r11                                                     ;Restore r11
+   161 000000DC 415A                    pop r10                                                     ;Restore r10
+   162 000000DE 4159                    pop r9                                                      ;Restore r9
+   163 000000E0 4158                    pop r8                                                      ;Restore r8
+   164 000000E2 59                      pop rcx                                                     ;Restore rcx
+   165 000000E3 5A                      pop rdx                                                     ;Restore rdx
+   166 000000E4 5E                      pop rsi                                                     ;Restore rsi
+   167 000000E5 5F                      pop rdi                                                     ;Restore rdi
+   168 000000E6 5D                      pop rbp                                                     ;Restore rbp
+   169                                  
+   170                                  
+   171                                  
+   172 000000E7 C3                      ret
+   173                                  
+   174                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+   175                                  
+   176                                  
+   177                                  

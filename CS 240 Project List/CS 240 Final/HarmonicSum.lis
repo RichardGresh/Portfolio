@@ -1,0 +1,316 @@
+     1                                  ;Richard Gresham
+     2                                  ;rgresham@csu.fullerton.edu
+     3                                  ;CS 240-7
+     4                                  
+     5                                  ;===== Begin code area ========================================================================================================
+     6                                  
+     7                                  extern printf
+     8                                  extern scanf
+     9                                  
+    10                                  
+    11                                  
+    12                                  
+    13                                  global HarmonicSumio
+    14                                  
+    15                                  
+    16                                  
+    17                                  Segment .data
+    18 00000000 456E74657220746865-     prompt1 db "Enter the number of terms desired: " , 0
+    18 00000009 206E756D626572206F-
+    18 00000012 66207465726D732064-
+    18 0000001B 6573697265643A2000 
+    19                                  
+    20 00000024 456E74657220746865-     prompt2 db "Enter the frequency of the processor as positive integer: ",0
+    20 0000002D 206672657175656E63-
+    20 00000036 79206F662074686520-
+    20 0000003F 70726F636573736F72-
+    20 00000048 20617320706F736974-
+    20 00000051 69766520696E746567-
+    20 0000005A 65723A2000         
+    21                                  
+    22 0000005F 256C6400                intformat1 db "%ld", 0
+    23                                  
+    24 00000063 5468652074696D6520-     time1 db "The time is now: %ld ticks" , 10, 0
+    24 0000006C 6973206E6F773A2025-
+    24 00000075 6C64207469636B730A-
+    24 0000007E 00                 
+    25 0000007F 6B203D20256C6400        sol1 db "k = %ld"  ,0
+    26 00000087 20202073756D203D20-     sol2 db "   sum = %.9lf" , 10 , 0
+    26 00000090 252E396C660A00     
+    27                                  
+    28 00000097 546865206861726D6F-     harmonic1 db "The harmonic algorithm executed for a total time = %ld ticks",0
+    28 000000A0 6E696320616C676F72-
+    28 000000A9 6974686D2065786563-
+    28 000000B2 7574656420666F7220-
+    28 000000BB 6120746F74616C2074-
+    28 000000C4 696D65203D20256C64-
+    28 000000CD 207469636B7300     
+    29 000000D4 206F6E206120256C64-     harmonic2 db " on a %ld Hz machine." ,10,0
+    29 000000DD 20487A206D61636869-
+    29 000000E6 6E652E0A00         
+    30                                  
+    31                                  Segment .bss
+    32                                  
+    33                                  
+    34                                  
+    35                                  Segment .text
+    36                                  
+    37                                  
+    38                                  
+    39                                  
+    40                                  HarmonicSumio:
+    41                                  
+    42                                  
+    43                                  ;Prolog ===== Insurance for any caller of this assembly module ========================================================
+    44                                  ;Any future program calling this module that the data in the caller's GPRs will not be modified. ;useful to always do
+    45 00000000 55                      push rbp
+    46 00000001 4889E5                  mov  rbp,rsp
+    47 00000004 57                      push rdi                                                    ;Backup rdi
+    48 00000005 56                      push rsi                                                    ;Backup rsi
+    49 00000006 52                      push rdx                                                    ;Backup rdx
+    50 00000007 51                      push rcx                                                    ;Backup rcx
+    51 00000008 4150                    push r8                                                     ;Backup r8
+    52 0000000A 4151                    push r9                                                     ;Backup r9
+    53 0000000C 4152                    push r10                                                    ;Backup r10
+    54 0000000E 4153                    push r11                                                    ;Backup r11
+    55 00000010 4154                    push r12                                                    ;Backup r12
+    56 00000012 4155                    push r13                                                    ;Backup r13
+    57 00000014 4156                    push r14                                                    ;Backup r14
+    58 00000016 4157                    push r15                                                    ;Backup r15
+    59 00000018 53                      push rbx                                                    ;Backup rbx
+    60 00000019 9C                      pushf                                                       ;Backup rflags
+    61                                  
+    62                                  ;Registers rax, rip, and rsp are usually not backed up.
+    63                                  
+    64                                  
+    65                                  ;Welcome prompt asking for inputed values
+    66 0000001A 6A00                    push qword 0
+    67                                  
+    68                                  
+    69                                  
+    70 0000001C B800000000              mov rax, 0
+    71 00000021 48BF-                   mov rdi, prompt1
+    71 00000023 [0000000000000000] 
+    72 0000002B E8(00000000)            call printf
+    73                                  
+    74 00000030 6A00                    push qword 0
+    75 00000032 B800000000              mov rax, 0
+    76 00000037 48BF-                   mov rdi,intformat1
+    76 00000039 [5F00000000000000] 
+    77 00000041 4889E6                  mov rsi, rsp
+    78 00000044 E8(00000000)            call scanf
+    79 00000049 58                      pop rax
+    80                                  
+    81 0000004A 4989C4                  mov r12, rax ;holds user input for k of my harmonic sum.
+    82                                  
+    83 0000004D B800000000              mov rax, 0
+    84 00000052 48BF-                   mov rdi, prompt2
+    84 00000054 [2400000000000000] 
+    85 0000005C E8(00000000)            call printf
+    86                                  
+    87 00000061 6A00                    push qword 0
+    88 00000063 B800000000              mov rax, 0
+    89 00000068 48BF-                   mov rdi,intformat1
+    89 0000006A [5F00000000000000] 
+    90 00000072 4889E6                  mov rsi, rsp
+    91 00000075 E8(00000000)            call scanf
+    92                                  
+    93 0000007A 58                      pop rax
+    94 0000007B 4989C3                  mov r11, rax ;holds the processor hz
+    95                                  
+    96 0000007E F24D0F2AFB              cvtsi2sd xmm15, r11 ;stores my processor hz since I'm having issues with volatility I'm keeping this in an xmm register and going to convert back to int later.
+    97                                  
+    98                                  ;gets the value of the cpu clock.
+    99 00000083 0FA2                    cpuid
+   100 00000085 0F31                    rdtsc
+   101 00000087 48C1E220                shl rdx,32
+   102 0000008B 4809D0                  or rax, rdx
+   103                                  
+   104 0000008E 4989C5                  mov r13, rax ;clock speed by ticks
+   105                                  
+   106 00000091 6A00                    push qword 0
+   107 00000093 B801000000              mov rax, 1
+   108 00000098 48BF-                   mov rdi, time1 ;prints out clock speed
+   108 0000009A [6300000000000000] 
+   109 000000A2 4C89EE                  mov rsi, r13
+   110 000000A5 E8(00000000)            call printf
+   111 000000AA 58                      pop rax
+   112                                  
+   113                                  
+   114                                  
+   115                                  
+   116                                  
+   117                                  ;divide the value user entered by 10 to get when to print every tenth harmonic sum
+   118 000000AB 4C89E0                  mov rax, r12
+   119 000000AE 41BE0A000000            mov r14, 10
+   120 000000B4 4899                    cqo 
+   121 000000B6 49F7F6                  div r14
+   122 000000B9 4989C6                  mov r14, rax ;this has the tenth value
+   123                                  
+   124 000000BC 4C89F5                  mov rbp, r14
+   125                                  
+   126                                  
+   127                                  
+   128 000000BF 41BF01000000            mov r15, 1
+   129                                  
+   130 000000C5 B800000000              mov rax, 0
+   131 000000CA F24C0F2AE8              cvtsi2sd xmm13, rax ;make sure xmm13 is zero
+   132 000000CF B801000000              mov rax, 1
+   133 000000D4 F24C0F2AF0              cvtsi2sd xmm14, rax ;set up values for my comparison of xmm14, xmm12 to prevent more than 10 values excluding the final value from printing.
+   134 000000D9 B80A000000              mov rax, 10
+   135 000000DE F24C0F2AE0              cvtsi2sd xmm12, rax
+   136                                  
+   137                                  
+   138                                  begin_loop:
+   139 000000E3 4D39E7                  cmp r15, r12
+   140 000000E6 0F8FB4000000            jg finish_loop
+   141                                  
+   142                                  
+   143 000000EC BB01000000              mov rbx, 1
+   144 000000F1 F24D0F2AD7              cvtsi2sd xmm10, r15
+   145 000000F6 F24C0F2ADB              cvtsi2sd xmm11, rbx
+   146                                  
+   147                                  ;divide xmm11 by xmm10 as required by formula and add it onto the total value
+   148 000000FB F2450F5EDA              divsd xmm11, xmm10
+   149 00000100 F2450F58EB              addsd xmm13, xmm11
+   150                                  
+   151                                  ;print out the value every tenth of teh value entered
+   152 00000105 4D39F7                  cmp r15,r14
+   153 00000108 7551                    jne check_ifequal
+   154                                  
+   155 0000010A 66450F2EF4              ucomisd xmm14, xmm12 ;did it so that it didn't print an 11th value such as 77 for a value of 78. It will skip print
+   156 0000010F 7736                    ja skip_print
+   157                                  
+   158                                  ;prints out tenth value of harmonic sum
+   159 00000111 6A00                    push qword 0
+   160 00000113 B801000000              mov rax, 1
+   161 00000118 48BF-                   mov rdi, sol1
+   161 0000011A [7F00000000000000] 
+   162 00000122 4C89FE                  mov rsi, r15
+   163 00000125 E8(00000000)            call printf
+   164 0000012A 58                      pop rax
+   165                                  
+   166 0000012B 6A00                    push qword 0
+   167 0000012D B801000000              mov rax, 1
+   168 00000132 48BF-                   mov rdi, sol2
+   168 00000134 [8700000000000000] 
+   169 0000013C F2410F10C5              movsd xmm0, xmm13
+   170 00000141 E8(00000000)            call printf
+   171 00000146 58                      pop rax
+   172                                  
+   173                                  
+   174                                  skip_print:
+   175 00000147 B801000000              mov rax, 1
+   176 0000014C F24C0F2AC8              cvtsi2sd xmm9, rax
+   177 00000151 F2450F58F1              addsd xmm14, xmm9 ;increment my xmm counter by 1 so that it won't print more than 10 values excluding the final one.
+   178                                  
+   179 00000156 4901EE                  add r14, rbp ;adds r14 by rbp which both contain a tenth of the code so that the tracker can keep going.
+   180                                  
+   181 00000159 EB3D                    jmp dont_print
+   182                                  
+   183                                  check_ifequal:
+   184 0000015B 4D39E7                  cmp r15, r12
+   185 0000015E 7538                    jne dont_print
+   186                                  
+   187 00000160 6A00                    push qword 0
+   188 00000162 B801000000              mov rax, 1
+   189 00000167 48BF-                   mov rdi, sol1
+   189 00000169 [7F00000000000000] 
+   190 00000171 4C89FE                  mov rsi, r15
+   191 00000174 E8(00000000)            call printf
+   192 00000179 58                      pop rax
+   193                                  
+   194 0000017A 6A00                    push qword 0
+   195 0000017C B801000000              mov rax, 1
+   196 00000181 48BF-                   mov rdi, sol2
+   196 00000183 [8700000000000000] 
+   197 0000018B F2410F10C5              movsd xmm0, xmm13
+   198 00000190 E8(00000000)            call printf
+   199 00000195 58                      pop rax
+   200                                  
+   201 00000196 EB00                    jmp dont_print
+   202                                  
+   203                                  
+   204                                  
+   205                                  dont_print:
+   206 00000198 49FFC7                  inc r15
+   207                                  
+   208 0000019B E943FFFFFF              jmp begin_loop
+   209                                  
+   210                                  
+   211                                  
+   212                                  
+   213                                  finish_loop:
+   214                                  
+   215                                  
+   216                                  ;gets the value of the cpu clock.
+   217 000001A0 0FA2                    cpuid
+   218 000001A2 0F31                    rdtsc
+   219 000001A4 48C1E220                shl rdx,32
+   220 000001A8 4809D0                  or rax, rdx
+   221                                  
+   222 000001AB 4989C7                  mov r15, rax
+   223                                  
+   224                                  
+   225 000001AE 6A00                    push qword 0
+   226 000001B0 B801000000              mov rax, 1
+   227 000001B5 48BF-                   mov rdi, time1
+   227 000001B7 [6300000000000000] 
+   228 000001BF 4C89EE                  mov rsi, r13
+   229 000001C2 E8(00000000)            call printf
+   230 000001C7 58                      pop rax
+   231                                  
+   232 000001C8 4D29EF                  sub r15, r13 ;holds total tick ran
+   233                                  
+   234 000001CB 6A00                    push qword 0
+   235 000001CD B801000000              mov rax, 1
+   236 000001D2 48BF-                   mov rdi, harmonic1
+   236 000001D4 [9700000000000000] 
+   237 000001DC 4C89FE                  mov rsi, r15
+   238 000001DF E8(00000000)            call printf
+   239 000001E4 58                      pop rax
+   240                                  
+   241                                  
+   242 000001E5 F24D0F2DF7              cvtsd2si r14, xmm15 ;converts my hz back into int
+   243                                  
+   244                                  
+   245                                  
+   246 000001EA 6A00                    push qword 0
+   247 000001EC B801000000              mov rax, 1
+   248 000001F1 48BF-                   mov rdi, harmonic2 ;prints my hz as an int
+   248 000001F3 [D400000000000000] 
+   249 000001FB 4C89F6                  mov rsi, r14
+   250 000001FE E8(00000000)            call printf
+   251 00000203 58                      pop rax
+   252                                  
+   253                                  
+   254                                  
+   255                                  
+   256 00000204 F2410F10C5              movsd xmm0, xmm13 ;return sum of Harmonic
+   257                                  
+   258 00000209 58                      pop rax
+   259                                  
+   260                                  ;===== Restore original values to integer registers ===================================================================
+   261 0000020A 9D                      popf                                                        ;Restore rflags
+   262 0000020B 5B                      pop rbx                                                     ;Restore rbx
+   263 0000020C 415F                    pop r15                                                     ;Restore r15
+   264 0000020E 415E                    pop r14                                                     ;Restore r14
+   265 00000210 415D                    pop r13                                                     ;Restore r13
+   266 00000212 415C                    pop r12                                                     ;Restore r12
+   267 00000214 415B                    pop r11                                                     ;Restore r11
+   268 00000216 415A                    pop r10                                                     ;Restore r10
+   269 00000218 4159                    pop r9                                                      ;Restore r9
+   270 0000021A 4158                    pop r8                                                      ;Restore r8
+   271 0000021C 59                      pop rcx                                                     ;Restore rcx
+   272 0000021D 5A                      pop rdx                                                     ;Restore rdx
+   273 0000021E 5E                      pop rsi                                                     ;Restore rsi
+   274 0000021F 5F                      pop rdi                                                     ;Restore rdi
+   275 00000220 5D                      pop rbp                                                     ;Restore rbp
+   276                                  
+   277                                  
+   278                                  
+   279 00000221 C3                      ret
+   280                                  
+   281                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+   282                                  
+   283                                  

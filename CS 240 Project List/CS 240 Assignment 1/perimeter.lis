@@ -1,0 +1,277 @@
+     1                                  ;****************************************************************************************************************************
+     2                                  ;Program name: "perimeter". Purpose of the program is given the width and height of the rectangle compute the total perimeter *
+     3                                  ; and the average length of side.                                                                                                                           *
+     4                                  ;This file is part of the software program "Area of Rectangles".                                                        *
+     5                                  ;Area of Rectangle is free software: you can redistribute it and/or modify it under the terms of the GNU General Public*
+     6                                  ;License version 3 as published by the Free Software Foundation.                                                            *
+     7                                  ;Area of Rectangles is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the       *
+     8                                  ;implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more      *
+     9                                  ;details.  A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                  *
+    10                                  ;****************************************************************************************************************************
+    11                                  
+    12                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    13                                  ;
+    14                                  ;Author information
+    15                                  ;  Author name: Richard Gresham
+    16                                  ;  Author email: rgresham@csu.fullerton.edu
+    17                                  ;
+    18                                  ;Program information
+    19                                  ;  Program name: perimeter
+    20                                  ;  Programming languages: One modules in C++ and one module in X86
+    21                                  ;  Date program began: 2021-Jan-28
+    22                                  ;  Date of last update: 2021-Feb-13
+    23                                  ;  Date comments upgraded: 2021-Feb-13
+    24                                  ;  Date open source license added: 2021-Feb-01
+    25                                  ;  Files in this program: rectangle.cpp, perimeter.asm, run.sh
+    26                                  ;  Status: Finished.
+    27                                  ;  References consulted: CS 240 class notes/lectures/Professor examples ie. floatio. Seyfarth, Chapter 18
+    28                                  ;  Future upgrade possible: software to reject non-floats.
+    29                                  ;
+    30                                  ;Purpose
+    31                                  ;  The main purpose of the program is given the width and height of the rectangle compute the total perimeter and the
+    32                                  ; average length of side.
+    33                                  ;  
+    34                                  ;
+    35                                  ;This file
+    36                                  ;  File name: perimeter.asm
+    37                                  ;  Language: X86 with Intel syntax.
+    38                                  ;  Max page width: 132 columns
+    39                                  ;  Assemble: nasm -f elf64 -l rectabgke.asm
+    40                                  
+    41                                  
+    42                                  ;===== Begin code area ========================================================================================================
+    43                                  
+    44                                  extern printf
+    45                                  extern scanf
+    46                                  global rectangleio
+    47                                  
+    48                                  segment .data
+    49                                  
+    50 00000000 456E74657220746865-     input1prompt db "Enter the height:" ,10 ,0 
+    50 00000009 206865696768743A0A-
+    50 00000012 00                 
+    51                                  
+    52 00000013 456E74657220746865-     input2prompt db "Enter the width:" ,10 ,0 
+    52 0000001C 2077696474683A0A00 
+    53 00000025 546869732070726F67-     output1prompt db "This program will compute the perimeter and the average side length of a rectangle." , 10 , 0
+    53 0000002E 72616D2077696C6C20-
+    53 00000037 636F6D707574652074-
+    53 00000040 686520706572696D65-
+    53 00000049 74657220616E642074-
+    53 00000052 686520617665726167-
+    53 0000005B 652073696465206C65-
+    53 00000064 6E677468206F662061-
+    53 0000006D 2072656374616E676C-
+    53 00000076 652E0A00           
+    54 0000007A 546865206865696768-     output2prompt db "The height of the rectangle is: %5.3lf" , 10,  0 ;use for upgradeability/not used for this project
+    54 00000083 74206F662074686520-
+    54 0000008C 72656374616E676C65-
+    54 00000095 2069733A2025352E33-
+    54 0000009E 6C660A00           
+    55 000000A2 546865207769647468-     output3prompt db "The width of the rectangle is: %5.3lf" , 10, 0  ;use for upgradeability/not used in this project
+    55 000000AB 206F66207468652072-
+    55 000000B4 656374616E676C6520-
+    55 000000BD 69733A2025352E336C-
+    55 000000C6 660A00             
+    56 000000C9 54686520706572696D-     output4prompt db "The perimeter of the rectangle is: %5.3lf" , 10, 0
+    56 000000D2 65746572206F662074-
+    56 000000DB 68652072656374616E-
+    56 000000E4 676C652069733A2025-
+    56 000000ED 352E336C660A00     
+    57 000000F4 546865206C656E6774-     output5prompt db "The length of the average side: %5.3lf" , 10 , 0
+    57 000000FD 68206F662074686520-
+    57 00000106 617665726167652073-
+    57 0000010F 6964653A2025352E33-
+    57 00000118 6C660A00           
+    58 0000011C 256C6600                height_float_number db "%lf", 0
+    59 00000120 256C6600                width_float_number db "%lf", 0
+    60 00000124 256C6600                perimeter_float_number db "%lf", 0
+    61 00000128 256C6600                division_float_number db "%lf", 0
+    62                                  ;final message
+    63 0000012C 4920686F706520796F-     finalmessage1 db "I hope you enjoyed your rectangle" , 10 ,0
+    63 00000135 7520656E6A6F796564-
+    63 0000013E 20796F757220726563-
+    63 00000147 74616E676C650A00   
+    64 0000014F 54686520617373656D-     finalmessage2 db "The assembly program will send the perimeter to the main function." , 10, 0
+    64 00000158 626C792070726F6772-
+    64 00000161 616D2077696C6C2073-
+    64 0000016A 656E64207468652070-
+    64 00000173 6572696D6574657220-
+    64 0000017C 746F20746865206D61-
+    64 00000185 696E2066756E637469-
+    64 0000018E 6F6E2E0A00         
+    65                                  
+    66                                  
+    67                                  segment .bss  ;Reserved for uninitialized data/ for things like arrays which is not needed this project
+    68                                  
+    69                                  segment .text ;Reserved for executing instructions ;used below
+    70                                  
+    71                                  
+    72                                  rectangleio:          ;my function called rectangleio
+    73                                  
+    74                                  ;Prolog ===== Insurance for any caller of this assembly module ========================================================
+    75                                  ;Any future program calling this module that the data in the caller's GPRs will not be modified. ;useful to always do
+    76 00000000 55                      push rbp
+    77 00000001 4889E5                  mov  rbp,rsp
+    78 00000004 57                      push rdi                                                    ;Backup rdi
+    79 00000005 56                      push rsi                                                    ;Backup rsi
+    80 00000006 52                      push rdx                                                    ;Backup rdx
+    81 00000007 51                      push rcx                                                    ;Backup rcx
+    82 00000008 4150                    push r8                                                     ;Backup r8
+    83 0000000A 4151                    push r9                                                     ;Backup r9
+    84 0000000C 4152                    push r10                                                    ;Backup r10
+    85 0000000E 4153                    push r11                                                    ;Backup r11
+    86 00000010 4154                    push r12                                                    ;Backup r12
+    87 00000012 4155                    push r13                                                    ;Backup r13
+    88 00000014 4156                    push r14                                                    ;Backup r14
+    89 00000016 4157                    push r15                                                    ;Backup r15
+    90 00000018 53                      push rbx                                                    ;Backup rbx
+    91 00000019 9C                      pushf                                                       ;Backup rflags
+    92                                  
+    93                                  ;Registers rax, rip, and rsp are usually not backed up.
+    94 0000001A 6A00                    push qword 0
+    95                                  
+    96                                  ;Display a welcome message to the viewer.
+    97 0000001C B800000000              mov rax, 0                      ;means print f uses no data from xmm registers
+    98 00000021 48BF-                   mov rdi, output1prompt               ; above message 
+    98 00000023 [2500000000000000] 
+    99 0000002B E8(00000000)            call printf
+   100                                  
+   101                                  
+   102                                  ; Display a prompt message asking for height
+   103                                  
+   104 00000030 6A00                    push qword 0
+   105 00000032 B800000000              mov rax, 0
+   106 00000037 48BF-                   mov rdi, input1prompt
+   106 00000039 [0000000000000000] 
+   107 00000041 E8(00000000)            call printf
+   108 00000046 58                      pop rax
+   109                                  
+   110                                  ; Begin the scanf block
+   111 00000047 6A00                    push qword 0
+   112 00000049 B800000000              mov rax, 0
+   113 0000004E 48BF-                   mov rdi, height_float_number
+   113 00000050 [1C01000000000000] 
+   114 00000058 4889E6                  mov rsi, rsp
+   115 0000005B E8(00000000)            call scanf
+   116 00000060 F2440F101424            movsd xmm10, [rsp] ; height of my rectangle
+   117                                  
+   118 00000066 58                      pop rax
+   119                                  
+   120                                  
+   121                                  
+   122                                  ; Display a prompt message asking for width
+   123 00000067 6A00                    push qword 0
+   124 00000069 B800000000              mov rax, 0
+   125 0000006E 48BF-                   mov rdi, input2prompt
+   125 00000070 [1300000000000000] 
+   126 00000078 E8(00000000)            call printf
+   127 0000007D 58                      pop rax
+   128                                  
+   129                                  ; begin the scanf block for width
+   130 0000007E 6A00                    push qword 0
+   131 00000080 B800000000              mov rax, 0
+   132 00000085 48BF-                   mov rdi, width_float_number
+   132 00000087 [2001000000000000] 
+   133 0000008F 4889E6                  mov rsi, rsp
+   134 00000092 E8(00000000)            call scanf
+   135 00000097 F2440F101C24            movsd xmm11, [rsp]; width of my rectangle
+   136 0000009D 58                      pop rax
+   137                                  
+   138                                  
+   139                                  ; now we are onto the arithmatic part
+   140                                  ; ------------------------- math part----------------------------------------------------------------
+   141                                  ;--- Arithmetic to get the perimeter of the rectangle------------------------------------------------
+   142                                  
+   143 0000009E B802000000              mov rax, 2
+   144 000000A3 F24C0F2AE0              cvtsi2sd xmm12, rax   ;stores float 2.00 in my xmm12 register
+   145                                  
+   146                                  
+   147 000000A8 B804000000              mov rax, 4
+   148 000000AD F24C0F2AE8              cvtsi2sd xmm13, rax    ;stores float 4.00 in my xmm13 register
+   149                                  
+   150                                  
+   151 000000B2 F2450F10F2              movsd xmm14, xmm10; copy of my data so I can maintain original numbers for later use in case of upgrades.
+   152 000000B7 F2450F10FA              movsd xmm15, xmm10  
+   153 000000BC F2450F10CB              movsd xmm9, xmm11
+   154                                  
+   155 000000C1 F2450F58F3              addsd xmm14, xmm11; adds my width to my copy height
+   156 000000C6 F2450F59F4              mulsd xmm14, xmm12; multiplies my copy height with my float number 2 giving me my perimeter 2(l + w)
+   157                                  
+   158                                  ; xmm14 will have our perimeter
+   159                                  ;---------------------------------------------------Average side-----------------------------
+   160                                  
+   161 000000CB F2450F59FC               mulsd xmm15, xmm12; multiplies our widthand height by 2 giving us the number for all the sides
+   162 000000D0 F2450F59CC               mulsd xmm9, xmm12
+   163                                  
+   164 000000D5 F2450F58F9               addsd xmm15, xmm9
+   165                                  
+   166 000000DA F2450F5EFD               divsd xmm15, xmm13; makes our xmm15 have our average side
+   167                                  
+   168                                  
+   169                                  
+   170 000000DF 58                      pop rax
+   171                                  ; --------------------------------------display perimeter and average side-------------- -
+   172                                  ; display perimeter
+   173 000000E0 B801000000              mov rax, 1
+   174 000000E5 48BF-                   mov rdi, output4prompt
+   174 000000E7 [C900000000000000] 
+   175 000000EF F2410F10C6              movsd xmm0, xmm14
+   176 000000F4 E8(00000000)            call printf
+   177                                  
+   178                                  
+   179                                  ;display average side
+   180                                  
+   181 000000F9 B801000000              mov rax, 1
+   182 000000FE 48BF-                   mov rdi, output5prompt
+   182 00000100 [F400000000000000] 
+   183 00000108 F2410F10C7              movsd xmm0, xmm15
+   184 0000010D E8(00000000)            call printf
+   185                                  
+   186                                  
+   187                                  
+   188                                  ; ==========================Prepare to exit the program======================================================================== =
+   189                                  
+   190                                  ; Goobye message
+   191 00000112 B800000000              mov rax, 0
+   192 00000117 48BF-                   mov rdi, finalmessage1
+   192 00000119 [2C01000000000000] 
+   193 00000121 E8(00000000)            call printf
+   194                                  
+   195                                  
+   196                                  
+   197 00000126 B800000000              mov rax, 0
+   198 0000012B 48BF-                   mov rdi, finalmessage2
+   198 0000012D [4F01000000000000] 
+   199 00000135 E8(00000000)            call printf
+   200                                  
+   201 0000013A F2410F10C6               movsd xmm0, xmm14 ;returns the perimeter to the main function in rectangle.cpp
+   202                                   
+   203                                  
+   204                                  
+   205                                  ;===== Restore original values to integer registers ===================================================================
+   206 0000013F 9D                      popf                                                        ;Restore rflags
+   207 00000140 5B                      pop rbx                                                     ;Restore rbx
+   208 00000141 415F                    pop r15                                                     ;Restore r15
+   209 00000143 415E                    pop r14                                                     ;Restore r14
+   210 00000145 415D                    pop r13                                                     ;Restore r13
+   211 00000147 415C                    pop r12                                                     ;Restore r12
+   212 00000149 415B                    pop r11                                                     ;Restore r11
+   213 0000014B 415A                    pop r10                                                     ;Restore r10
+   214 0000014D 4159                    pop r9                                                      ;Restore r9
+   215 0000014F 4158                    pop r8                                                      ;Restore r8
+   216 00000151 59                      pop rcx                                                     ;Restore rcx
+   217 00000152 5A                      pop rdx                                                     ;Restore rdx
+   218 00000153 5E                      pop rsi                                                     ;Restore rsi
+   219 00000154 5F                      pop rdi                                                     ;Restore rdi
+   220 00000155 5D                      pop rbp                                                     ;Restore rbp
+   221                                  
+   222                                  
+   223                                  
+   224 00000156 C3                      ret
+   225                                  
+   226                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+   227                                  
+   228                                  
+   229                                  
+   230                                  
