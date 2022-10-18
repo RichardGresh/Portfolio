@@ -1,0 +1,6 @@
+﻿  HW4_RichardGresham.cpp
+  HW4_RichardGreshamDlg.cpp
+C:\Users\Gresh\Documents\Spring 2022\CPSC 351 operating systems\Assignments\cs351_assignment4\HW4_RichardGresham\HW4_RichardGresham\HW4_RichardGreshamDlg.cpp(214,78): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Gresh\Documents\Spring 2022\CPSC 351 operating systems\Assignments\cs351_assignment4\HW4_RichardGresham\HW4_RichardGresham\HW4_RichardGreshamDlg.cpp(242,22): warning C4101: 'local_rec': unreferenced local variable
+  Generating Code...
+  HW4_RichardGresham.vcxproj -> C:\Users\Gresh\Documents\Spring 2022\CPSC 351 operating systems\Assignments\cs351_assignment4\HW4_RichardGresham\x64\Debug\HW4_RichardGresham.exe
