@@ -1,0 +1,2 @@
+Horror Frame Project: Sensor is inbuilt into a frame that once triggered, will change the frozen frame of the picture into an animation that will play. 
+Completed using python with a portable monitor, frame, and a HiLetgo HC-SR501 PIR Infrared Sensor, connected to a raspberry pi.
